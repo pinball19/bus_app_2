@@ -198,9 +198,8 @@ export const addSchedule = async (scheduleData) => {
 };
 
 // スタイル情報を含めたスケジュール更新
-export const updateScheduleWithStyles = async (id, scheduleData, originalData = null) => {
+export const updateScheduleWithStyles = async (id, scheduleData) => {
   debugLog(`ID: ${id} のスケジュールを更新します:`, scheduleData);
-  debugLog(`元データ:`, originalData);
   
   // 日付フィールドをTimestampに変換
   let dataToSave = { ...scheduleData };
@@ -215,11 +214,6 @@ export const updateScheduleWithStyles = async (id, scheduleData, originalData = 
   
   try {
     const docRef = doc(db, 'schedules', id);
-    
-    // 変更履歴機能は削除
-    if (originalData) {
-      debugLog('変更履歴機能は削除されました');
-    }
     
     // ドキュメント更新
     await updateDoc(docRef, dataToSave);
@@ -248,7 +242,6 @@ export const deleteSchedule = async (id) => {
     throw error;
   }
 };
-
 // アラート条件を検出する関数
 export const detectAlerts = (scheduleData) => {
   console.log("==== アラート検出処理開始 ====");
@@ -793,6 +786,9 @@ export const checkDriverConsecutiveWorkDays = async (driverName) => {
         } else {
           departureDate = new Date(schedule.departureDate);
         }
+      } else if (schedule.departureDate && typeof schedule.departureDate.toDate === 'function') {
+        // Firestoreのタイムスタンプの場合
+        departureDate = schedule.departureDate.toDate();
       }
       
       if (!departureDate || isNaN(departureDate.getTime())) return;
@@ -924,9 +920,4 @@ export const addMessageToSchedule = async (scheduleId, messageData) => {
   }
 };
 
-// 変更履歴機能は削除されました
-// 履歴投稿機能を無効化するためにダミー関数のみ残します
-export const addChangeHistoryMessage = async (scheduleId, changes, username = 'システム') => {
-  debugLog('変更履歴機能は無効化されました');
-  return false;
-};
+// 履歴投稿機能は削除しました

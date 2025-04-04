@@ -698,65 +698,64 @@ const checkAlerts = useCallback((data) => {
     }
   };
 
-  // 既存予約の更新処理 - 修正版
-  const handleUpdateSchedule = async (formData, originalData = null, stayOnPage = true) => { // デフォルトでページに留まるように変更
-    try {
-      console.log("更新処理開始。formData:", formData);
-      console.log("originalData:", originalData);
-      console.log("stayOnPage:", stayOnPage);
+  // 既存予約の更新処理 - 修正版（履歴投稿機能を削除）
+const handleUpdateSchedule = async (formData, originalData = null, stayOnPage = true) => { // デフォルトでページに留まるように変更
+  try {
+    console.log("更新処理開始。formData:", formData);
+    console.log("stayOnPage:", stayOnPage);
 
-      if (formData.delete) {
-        // 削除処理
-        await deleteSchedule(formData.id);
-        
-        // 削除後は常にカレンダーに戻る
-        handleBackToCalendar();
-      } else {
-        // 更新処理（スタイル情報付き）- 変更履歴を記録するためにオリジナルデータも渡す
-        const result = await updateScheduleWithStyles(formData.id, formData, originalData);
-        console.log("更新結果:", result);
+    if (formData.delete) {
+      // 削除処理
+      await deleteSchedule(formData.id);
       
-        // 変更後に手動でデータを再取得
-        let updatedData;
-        if (filterBus) {
-          updatedData = await getSchedulesByBus(filterBus, currentMonth, currentYear);
-        } else if (filterContactPerson) {
-          updatedData = await getSchedulesByContactPerson(filterContactPerson, currentMonth, currentYear);
-        } else {
-          updatedData = await getSchedules(currentMonth, currentYear);
-        }
-        
-        // データを再整理して状態を更新
-        const organizedData = organizeScheduleData(updatedData);
-        setScheduleData(organizedData);
-        
-        // 担当者リストを更新
-        const persons = [...new Set(updatedData.map(item => item.contactPerson).filter(Boolean))];
-        setContactPersons(persons);
-        
-        // アラートを再チェック
-        checkAlerts(organizedData);
-        
-        // 更新成功のモーダルを表示
-        console.log("更新モーダルを表示します");
-        setUpdateModalVisible(true);
-        
-        // 一定時間後にモーダルを閉じる
-        setTimeout(() => {
-          console.log("モーダルを閉じます");
-          setUpdateModalVisible(false);
-          
-          // ページ遷移はstayOnPageフラグに基づいて行う
-          if (!stayOnPage) {
-            handleBackToCalendar();
-          }
-        }, 1500);
+      // 削除後は常にカレンダーに戻る
+      handleBackToCalendar();
+    } else {
+      // 更新処理（スタイル情報付き）- 履歴投稿機能を削除
+      const result = await updateScheduleWithStyles(formData.id, formData);
+      console.log("更新結果:", result);
+    
+      // 変更後に手動でデータを再取得
+      let updatedData;
+      if (filterBus) {
+        updatedData = await getSchedulesByBus(filterBus, currentMonth, currentYear);
+      } else if (filterContactPerson) {
+        updatedData = await getSchedulesByContactPerson(filterContactPerson, currentMonth, currentYear);
+      } else {
+        updatedData = await getSchedules(currentMonth, currentYear);
       }
-    } catch (err) {
-      console.error("予約更新エラー:", err);
-      alert("予約の更新中にエラーが発生しました。");
+      
+      // データを再整理して状態を更新
+      const organizedData = organizeScheduleData(updatedData);
+      setScheduleData(organizedData);
+      
+      // 担当者リストを更新
+      const persons = [...new Set(updatedData.map(item => item.contactPerson).filter(Boolean))];
+      setContactPersons(persons);
+      
+      // アラートを再チェック
+      checkAlerts(organizedData);
+      
+      // 更新成功のモーダルを表示
+      console.log("更新モーダルを表示します");
+      setUpdateModalVisible(true);
+      
+      // 一定時間後にモーダルを閉じる
+      setTimeout(() => {
+        console.log("モーダルを閉じます");
+        setUpdateModalVisible(false);
+        
+        // ページ遷移はstayOnPageフラグに基づいて行う
+        if (!stayOnPage) {
+          handleBackToCalendar();
+        }
+      }, 1500);
     }
-  };
+  } catch (err) {
+    console.error("予約更新エラー:", err);
+    alert("予約の更新中にエラーが発生しました。");
+  }
+};
 
   // CSVエクスポート
   const handleExportCSV = async () => {

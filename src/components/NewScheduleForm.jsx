@@ -105,9 +105,9 @@ const NewScheduleForm = ({ selectedCell, onSave, onCancel }) => {
     fetchDrivers();
   }, []);
   
-  // 選択したセルの情報から出発日とバスタイプを設定
+  // 選択したセルの情報から日付のみを設定 (バス名は設定しない)
   useEffect(() => {
-    if (selectedCell && selectedCell.day !== undefined && selectedCell.busName) {
+    if (selectedCell && selectedCell.day !== undefined) {
       console.log('選択されたセル情報:', selectedCell);
       
       // 日付の検証と変換
@@ -126,32 +126,19 @@ const NewScheduleForm = ({ selectedCell, onSave, onCancel }) => {
       const departureDateStr = formatDateForInput(selectedYear, selectedMonth, validDay);
       console.log(`選択した日付から生成した出発日: ${departureDateStr}`);
       
-      // バスタイプの抽出
-      let busType = '';
-      const busName = selectedCell.busName;
-      if (busName.includes('マイクロ')) busType = 'マイクロ';
-      else if (busName.includes('小型')) busType = '小型';
-      else if (busName.includes('中型')) busType = '中型';
-      else if (busName.includes('大型')) busType = '大型';
-      
       // 帰着日を計算 (出発日と同じ - 予約日数が1の場合)
       const returnDateStr = departureDateStr;
       
-      // 情報をフォームにセット
-      console.log(`フォームを更新します: 出発日=${departureDateStr}, バスタイプ=${busType}`);
-      
-      // timeoutを使用して非同期更新
+      // 時間差をおいて日付情報のみを更新
       setTimeout(() => {
         setFormData(prev => ({
           ...prev,
           departureDate: departureDateStr,
-          returnDate: returnDateStr,
-          busType: busType
+          returnDate: returnDateStr
         }));
       }, 0);
     }
   }, [selectedCell]);
-
   // フォームデータが更新されたときにカレンダー入力フィールドの動作確認
   useEffect(() => {
     console.log('フォームデータが更新されました:', formData);
@@ -254,7 +241,7 @@ const NewScheduleForm = ({ selectedCell, onSave, onCancel }) => {
     return true;
   };
 
-  // スタイル変更ハンドラー - 新規追加
+  // スタイル変更ハンドラー
   const handleStyleChange = (fieldName, bgColor, textColor) => {
     console.log(`${fieldName}のスタイルを変更: 背景=${bgColor}, 文字=${textColor}`);
     
@@ -270,7 +257,7 @@ const NewScheduleForm = ({ selectedCell, onSave, onCancel }) => {
     }));
   };
 
-  // フォーム送信処理 - スタイル情報を含める
+  // フォーム送信処理
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -635,7 +622,7 @@ const NewScheduleForm = ({ selectedCell, onSave, onCancel }) => {
           />
         </div>
 
-        {/* スタイル編集セクション - 新規追加 */}
+        {/* スタイル編集セクション */}
         <div className="form-group" style={{marginTop: '20px'}}>
           <button 
             type="button" 

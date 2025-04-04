@@ -210,7 +210,6 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
       }, 0);
     }
   }, [schedule]);
-
   // ドライバー一覧を取得
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -382,8 +381,7 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
   };
-  
-  // フォーム送信処理 - スタイル情報を含める
+  // フォーム送信処理
   const handleSubmit = async (e, stayOnPage = true) => { // デフォルトでページに留まるように変更
     e.preventDefault();
     setLoadingMessages(true); // ローディング状態にする
@@ -406,12 +404,12 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
       span = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       
       console.log(`出発日と帰着日から計算された予約日数: ${span}日`);
+      
+      // formDataのspanを上書き
+      formData.span = span;
     }
     
     console.log('更新するデータ:', formData);
-    
-    // 現在のフォームデータを保存（変更検出用）
-    const originalData = { ...schedule.originalData };
     
     // 更新データを作成
     const updatedData = {
@@ -425,14 +423,12 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
       year: new Date(formData.departureDate).getFullYear() // 年を適切に設定
     };
     
-    // オリジナルデータと更新データを渡して変更を検出できるようにする
-    console.log('オリジナルデータ:', originalData);
     console.log('更新後データ:', updatedData);
     console.log('ページ維持フラグ:', stayOnPage);
     
     try {
       // 更新処理を実行
-      await onUpdate(updatedData, originalData, stayOnPage);
+      await onUpdate(updatedData, null, stayOnPage);
       
       // 更新後、メッセージを再取得して表示を更新（500ms待機して確実に変更が反映されるようにする）
       setTimeout(async () => {
@@ -487,7 +483,6 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
       ))}
     </div>
   );
-
   return (
     <div className="form-container">
       <div className="form-header">
@@ -658,7 +653,6 @@ const EditScheduleForm = ({ schedule, onUpdate, onCancel }) => {
             </button>
           </div>
         </div>
-
         <div className="form-group">
           <label htmlFor="contactInfo">連絡先・メール</label>
           <input
